@@ -1,0 +1,18 @@
+apiVersion: v2
+name: k8s-watch-server
+description: Kubernetes watch event service for incident investigation
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - kubernetes
+  - audit
+  - events
+  - monitoring
+  - mcp
+home: https://github.com/moritz/mcp-toolkit
+sources:
+  - https://github.com/moritz/mcp-toolkit
+maintainers:
+  - name: Moritz
+    email: moritz@example.com

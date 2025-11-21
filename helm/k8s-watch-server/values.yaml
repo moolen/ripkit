@@ -1,0 +1,220 @@
+# Default values for k8s-watch-server
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Number of replicas (must be 1 for BadgerDB)
+replicaCount: 1
+
+image:
+  repository: k8s-watch-server
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 1000
+  runAsNonRoot: true
+  runAsUser: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 8080
+  annotations: {}
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+  requests:
+    cpu: 500m
+    memory: 2Gi
+
+# Persistence configuration
+persistence:
+  enabled: true
+  # storageClassName: standard
+  accessMode: ReadWriteOnce
+  size: 50Gi
+  annotations: {}
+
+# Liveness and readiness probes
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Configuration for the watch server
+config:
+  # Enable CRD auto-discovery
+  discoverCRDs: true
+  
+  # Storage path inside the container
+  storagePath: /data/watch-events
+  
+  # Retention period in days
+  retentionDays: 14
+  
+  # HTTP server port
+  serverPort: 8000
+  
+  # Maximum query limit
+  maxQueryLimit: 1000
+  
+  # Resources to watch
+  resources:
+    # Core API resources
+    - group: ""
+      version: v1
+      kind: Pod
+      plural: pods
+      namespaced: true
+    
+    - group: ""
+      version: v1
+      kind: Node
+      plural: nodes
+      namespaced: false
+    
+    - group: ""
+      version: v1
+      kind: Service
+      plural: services
+      namespaced: true
+    
+    - group: ""
+      version: v1
+      kind: ConfigMap
+      plural: configmaps
+      namespaced: true
+    
+    - group: ""
+      version: v1
+      kind: Secret
+      plural: secrets
+      namespaced: true
+    
+    - group: ""
+      version: v1
+      kind: PersistentVolumeClaim
+      plural: persistentvolumeclaims
+      namespaced: true
+    
+    - group: ""
+      version: v1
+      kind: PersistentVolume
+      plural: persistentvolumes
+      namespaced: false
+    
+    - group: ""
+      version: v1
+      kind: Event
+      plural: events
+      namespaced: true
+    
+    - group: ""
+      version: v1
+      kind: Namespace
+      plural: namespaces
+      namespaced: false
+    
+    # Apps API resources
+    - group: apps
+      version: v1
+      kind: Deployment
+      plural: deployments
+      namespaced: true
+    
+    - group: apps
+      version: v1
+      kind: ReplicaSet
+      plural: replicasets
+      namespaced: true
+    
+    - group: apps
+      version: v1
+      kind: StatefulSet
+      plural: statefulsets
+      namespaced: true
+    
+    - group: apps
+      version: v1
+      kind: DaemonSet
+      plural: daemonsets
+      namespaced: true
+    
+    # Batch API resources
+    - group: batch
+      version: v1
+      kind: Job
+      plural: jobs
+      namespaced: true
+    
+    - group: batch
+      version: v1
+      kind: CronJob
+      plural: cronjobs
+      namespaced: true
+    
+    # Networking resources
+    - group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      plural: ingresses
+      namespaced: true
+    
+    - group: networking.k8s.io
+      version: v1
+      kind: NetworkPolicy
+      plural: networkpolicies
+      namespaced: true
+
+# RBAC configuration
+rbac:
+  # Specifies whether RBAC resources should be created
+  create: true

@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: k8s-watch-server
+  namespace: default
+  labels:
+    app: k8s-watch-server
+spec:
+  serviceName: k8s-watch-server
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8s-watch-server
+  template:
+    metadata:
+      labels:
+        app: k8s-watch-server
+    spec:
+      serviceAccountName: k8s-watch-server
+      containers:
+        - name: server
+          image: k8s-watch-server:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          env:
+            - name: BADGER_PATH
+              value: /data/watch-events
+            - name: CONFIG_PATH
+              value: /config/resources.yaml
+            - name: SERVER_PORT
+              value: "8080"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /config
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+      volumes:
+        - name: config
+          configMap:
+            name: k8s-watch-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 50Gi
+        # Uncomment and specify storageClassName if needed
+        # storageClassName: standard

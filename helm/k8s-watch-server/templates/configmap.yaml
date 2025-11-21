@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "k8s-watch-server.configMapName" . }}
+  labels:
+    {{- include "k8s-watch-server.labels" . | nindent 4 }}
+data:
+  resources.yaml: |
+    discoverCRDs: {{ .Values.config.discoverCRDs }}
+    storagePath: {{ .Values.config.storagePath }}
+    retentionDays: {{ .Values.config.retentionDays }}
+    serverPort: {{ .Values.config.serverPort }}
+    maxQueryLimit: {{ .Values.config.maxQueryLimit }}
+    
+    resources:
+    {{- range .Values.config.resources }}
+      - group: {{ .group | quote }}
+        version: {{ .version }}
+        kind: {{ .kind }}
+        plural: {{ .plural }}
+        namespaced: {{ .namespaced }}
+    {{- end }}
